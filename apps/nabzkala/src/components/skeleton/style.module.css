@@ -1,0 +1,41 @@
+.animateSkeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.animateSkeleton:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    black 40%,
+    black 60%,
+    transparent
+  );
+  animation: skeleton 1s infinite;
+  opacity: 0.05;
+}
+
+:global(.dark) .animateSkeleton:after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    white 40%,
+    white 60%,
+    transparent
+  );
+}
+
+@keyframes skeleton {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

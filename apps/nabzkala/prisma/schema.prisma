@@ -1,0 +1,491 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  phone     String     @unique
+  email     String?    @unique
+  firstName String
+  lastName  String
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  profile   Profile?
+  sessions  Session[]
+  business  Business[]
+  cart      Cart?
+  address   Address[]
+  Order     Order[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  seenAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  expiresIn DateTime
+
+  @@index([userId])
+}
+
+model OneTimePassword {
+  for       String   @unique
+  code      String
+  expiresIn DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id                  String   @id @default(uuid())
+  customerId          String
+  customer            User     @relation(fields: [customerId], references: [id])
+  firstName           String
+  lastName            String
+  phone               String
+  postalCode          String
+  address             String
+  cityId              String
+  city                City     @relation(fields: [cityId], references: [id])
+  provinceId          String
+  province            Province @relation(fields: [provinceId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  cartBillingAddress  Cart[]   @relation("BillingAddress")
+  cartShippingAddress Cart[]   @relation("ShippingAddress")
+}
+
+model Profile {
+  id           String    @id @default(uuid())
+  birthDate    DateTime?
+  nationalCode String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  Seller
+  USER
+}
+
+model Product {
+  id                                 String             @id @default(uuid())
+  name                               String
+  slug                               String             @unique
+  image                              String
+  active                             Boolean            @default(false)
+  shortDescription                   String?
+  description                        String?
+  discountable                       Boolean            @default(true)
+  brandId                            String?
+  brand                              Brand?             @relation(fields: [brandId], references: [id])
+  createdAt                          DateTime           @default(now())
+  updatedAt                          DateTime           @updatedAt
+  typeId                             String
+  type                               ProductType        @relation(fields: [typeId], references: [id])
+  categoryId                         String
+  category                           Category           @relation(fields: [categoryId], references: [id])
+  attributesOnProductTypesOnProducts ProductAttribute[]
+  variant                            ProductVariant[]
+  businessesOnProducts               BusinessProduct[]
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String
+  logo        String?
+  description String?
+  website     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Product     Product[]
+}
+
+model ProductType {
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  shippable    Boolean                @default(true)
+  bundle       Boolean                @default(false)
+  downloadable Boolean                @default(false)
+  variable     Boolean                @default(false)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  product      Product[]
+  attributes   ProductTypeAttribute[]
+}
+
+model Attribute {
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  slug         String                 @unique
+  type         AttributeType
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  productTypes ProductTypeAttribute[]
+}
+
+enum AttributeType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  SELECT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+  CURENCY
+}
+
+model ProductTypeAttribute {
+  id                                 String                      @id @default(uuid())
+  attributeId                        String
+  attribute                          Attribute                   @relation(fields: [attributeId], references: [id])
+  productTypeId                      String
+  productType                        ProductType                 @relation(fields: [productTypeId], references: [id])
+  filtrable                          Boolean                     @default(false)
+  required                           Boolean                     @default(false)
+  variant                            Boolean                     @default(false)
+  values                             ProductTypeAttributeValue[]
+  attributesOnProductTypesOnProducts ProductAttribute[]
+
+  @@unique([attributeId, productTypeId])
+}
+
+model ProductTypeAttributeValue {
+  id                                           String                    @id @default(uuid())
+  attributeOnProductTypeId                     String
+  attributeOnProductType                       ProductTypeAttribute      @relation(fields: [attributeOnProductTypeId], references: [id])
+  value                                        String
+  attributesOnProductTypesOnProductsOnVariants ProductVariantAttribute[]
+}
+
+model ProductAttribute {
+  id                                           String                    @id @default(uuid())
+  attributesOnProductTypesId                   String
+  attributesOnProductTypes                     ProductTypeAttribute      @relation(fields: [attributesOnProductTypesId], references: [id])
+  productId                                    String
+  product                                      Product                   @relation(fields: [productId], references: [id])
+  value                                        String
+  attributesOnProductTypesOnProductsOnVariants ProductVariantAttribute[]
+
+  @@unique([attributesOnProductTypesId, productId])
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  parentId    String?
+  parent      Category?  @relation("Children", fields: [parentId], references: [id])
+  children    Category[] @relation("Children")
+  product     Product[]
+}
+
+model ProductVariant {
+  id                                           String                    @id @default(uuid())
+  name                                         String
+  image                                        String?
+  weight                                       Decimal?
+  productId                                    String
+  product                                      Product                   @relation(fields: [productId], references: [id])
+  attributesOnProductTypesOnProductsOnVariants ProductVariantAttribute[]
+  businessProductsOnVariants                   BusinessProductVariant[]
+}
+
+model ProductVariantAttribute {
+  id                                   String                    @id @default(uuid())
+  attributesOnProductTypesOnProductsId String
+  attributesOnProductTypesOnProducts   ProductAttribute          @relation(fields: [attributesOnProductTypesOnProductsId], references: [id])
+  variantId                            String
+  variant                              ProductVariant            @relation(fields: [variantId], references: [id])
+  attributesOnProductTypesValueId      String
+  attributesOnProductTypesValue        ProductTypeAttributeValue @relation(fields: [attributesOnProductTypesValueId], references: [id])
+
+  @@unique([attributesOnProductTypesOnProductsId, attributesOnProductTypesValueId])
+}
+
+model Business {
+  id                  String            @id @default(uuid())
+  name                String
+  userId              String
+  user                User              @relation(fields: [userId], references: [id])
+  businessOnProduct   BusinessProduct[]
+  warehouse           Warehouse[]
+  bankAccounts        BankAccount[]
+  activeBankAccountId String?           @unique
+  activeBankAccount   BankAccount?      @relation("ActiveBankAccount", fields: [activeBankAccountId], references: [id])
+}
+
+// TODO 
+model BankAccount {
+  id         String    @id @default(uuid())
+  number     String
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id])
+  Business   Business? @relation("ActiveBankAccount")
+
+  @@unique([businessId, number])
+}
+
+model BusinessProduct {
+  id                         String                   @id @default(uuid())
+  businessId                 String
+  business                   Business                 @relation(fields: [businessId], references: [id])
+  productId                  String
+  product                    Product                  @relation(fields: [productId], references: [id])
+  businessProductsOnVariants BusinessProductVariant[]
+
+  @@unique([businessId, productId])
+}
+
+model BusinessProductVariant {
+  id                                     String                          @id @default(uuid())
+  variantId                              String
+  variant                                ProductVariant                  @relation(fields: [variantId], references: [id])
+  businessProductId                      String
+  businessProduct                        BusinessProduct                 @relation(fields: [businessProductId], references: [id])
+  businessProductsOnVariantsOnWarehouses Stock[]
+  businessProductsOnVariantsOnChannels   BusinessProductVariantChannel[]
+  sku                                    String
+
+  @@unique([variantId, businessProductId])
+}
+
+model Stock {
+  businessProductsOnVariantsId String
+  businessProductOnVariant     BusinessProductVariant @relation(fields: [businessProductsOnVariantsId], references: [id])
+  warehouseId                  String
+  warehouse                    Warehouse              @relation(fields: [warehouseId], references: [id])
+  quantity                     Int
+  allocatedQuantity            Int
+
+  @@id([businessProductsOnVariantsId, warehouseId])
+}
+
+model BusinessProductVariantChannel {
+  id                           String                 @id @default(uuid())
+  businessProductsOnVariantsId String
+  businessProductOnVariant     BusinessProductVariant @relation(fields: [businessProductsOnVariantsId], references: [id])
+  channelId                    String
+  channel                      Channel                @relation(fields: [channelId], references: [id])
+  price                        Decimal
+
+  @@unique([businessProductsOnVariantsId, channelId])
+}
+
+model Cart {
+  id                String     @id @default(uuid())
+  email             String
+  billingAddressId  String
+  billingAddress    Address    @relation("BillingAddress", fields: [billingAddressId], references: [id])
+  shippingAddressId String
+  shippingAddress   Address    @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  customerId        String     @unique
+  user              User       @relation(fields: [customerId], references: [id])
+  type              CartType
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  compatedAt        DateTime?
+  deletedAt         DateTime?
+  channelId         String
+  channel           Channel    @relation(fields: [channelId], references: [id])
+  lineItem          LineItem[]
+  order             Order[]
+}
+
+enum CartType {
+  DEFAULT
+}
+
+model LineItem {
+  id                String            @id @default(uuid())
+  cartId            String
+  cart              Cart              @relation(fields: [cartId], references: [id])
+  swapId            String
+  swap              Swap              @relation(fields: [swapId], references: [id])
+  title             String
+  description       String
+  variantId         String
+  quantity          String
+  fulfilledQuantity Int
+  returnedQuantity  Int
+  shippedQuantity   Int
+  isReturn          Boolean
+  originalItemId    String?           @unique
+  originalItem      LineItem?         @relation("OriginalItem", fields: [originalItemId], references: [id])
+  lineItem          LineItem?         @relation("OriginalItem")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  FulfillmentItem   FulfillmentItem[]
+}
+
+model Fulfillment {
+  id              String            @id @default(cuid())
+  swapId          String
+  swap            Swap              @relation(fields: [swapId], references: [id])
+  orderId         String
+  order           Order             @relation(fields: [orderId], references: [id])
+  shippedAt       DateTime?
+  canceledAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  FulfillmentItem FulfillmentItem[]
+}
+
+model FulfillmentItem {
+  fulfillmentId String
+  fulfillment   Fulfillment @relation(fields: [fulfillmentId], references: [id])
+  itemId        String
+  lineItem      LineItem    @relation(fields: [itemId], references: [id])
+  quantity      Int
+
+  @@id([fulfillmentId, itemId])
+}
+
+model Shipping {
+  id        String   @id @default(uuid())
+  name      String
+  image     String
+  phone     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id                String            @id @default(uuid())
+  Fulfillment       Fulfillment[]
+  status            OrderStatus
+  fulfillmentStatus FulfillmentStatus
+  paymentStatus     PaymentStatus
+  cartId            String
+  cart              Cart              @relation(fields: [cartId], references: [id])
+  customerId        String
+  user              User              @relation(fields: [customerId], references: [id])
+  email             String
+  channelId         String
+  channel           Channel           @relation(fields: [channelId], references: [id])
+  canceledAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+}
+
+enum FulfillmentStatus {
+  FULFILLED
+}
+
+enum PaymentStatus {
+  CAPTURED
+}
+
+model Swap {
+  id          String        @id @default(uuid())
+  LineItem    LineItem[]
+  Fulfillment Fulfillment[]
+}
+
+model Channel {
+  id                                   String                          @id
+  name                                 String
+  description                          String?
+  active                               Boolean                         @default(true)
+  currencyId                           String
+  // TODO add allocation strategy
+  currency                             Currency                        @relation(fields: [currencyId], references: [id])
+  businessProductsOnVariantsOnChannels BusinessProductVariantChannel[]
+  Cart                                 Cart[]
+  Order                                Order[]
+}
+
+model Warehouse {
+  id                                     String   @id @default(uuid())
+  name                                   String
+  priority                               Bytes
+  company                                String
+  postalCode                             String
+  address                                String
+  cityId                                 String
+  city                                   City     @relation(fields: [cityId], references: [id])
+  phone                                  String
+  businessId                             String
+  business                               Business @relation(fields: [businessId], references: [id])
+  businessProductsOnVariantsOnWarehouses Stock[]
+}
+
+model Currency {
+  id           String    @id @default(uuid())
+  name         String
+  code         String
+  symbol       String
+  nativeSymbol String
+  countryId    String
+  country      Country   @relation(fields: [countryId], references: [id])
+  channel      Channel[]
+}
+
+model Zone {
+  id      String    @id @default(uuid())
+  name    String    @unique
+  country Country[]
+}
+
+model Country {
+  id       String     @id @default(uuid())
+  name     String     @unique
+  zoneId   String
+  zone     Zone       @relation(fields: [zoneId], references: [id])
+  province Province[]
+  currency Currency[]
+}
+
+model Province {
+  id        String    @id @default(uuid())
+  name      String
+  countryId String
+  country   Country   @relation(fields: [countryId], references: [id])
+  city      City[]
+  address   Address[]
+}
+
+model City {
+  id         String      @id @default(uuid())
+  name       String
+  provinceId String
+  province   Province    @relation(fields: [provinceId], references: [id])
+  warehouse  Warehouse[]
+  address    Address[]
+}
+
+model File {
+  id              String @id @default(uuid())
+  name            String
+  alternativeText String?
+  width           Int?
+  height          Int?
+  mime            String
+  size            Int
+  url             String
+  ext             String?
+}
