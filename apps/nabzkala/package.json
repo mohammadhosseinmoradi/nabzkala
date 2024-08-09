@@ -74,7 +74,7 @@
     "@next/eslint-plugin-next": "^14.2.5",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "4.0.0-alpha.18",
+    "@tailwindcss/postcss": "4.0.0-alpha.19",
     "@types/negotiator": "^0.6.3",
     "eslint": "9.8.0",
     "eslint-config-next": "14.2.5",
@@ -82,6 +82,6 @@
     "prettier": "^3.3.3",
     "prisma": "^5.18.0",
     "serwist": "^9.0.5",
-    "tailwindcss": "4.0.0-alpha.18"
+    "tailwindcss": "4.0.0-alpha.19"
   }
 }
