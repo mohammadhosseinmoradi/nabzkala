@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../../../node_modules/@repo/design-system/**/*.{html,js,jsx,ts,tsx}";
+
 :root {
   font-family: Inter, sans-serif;
   font-feature-settings: "cv11";
