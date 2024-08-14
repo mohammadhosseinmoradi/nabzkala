@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Result } from "@/types/result";
 import { join } from "path";
-import { getFileExtension } from "@/lib/utils/get-file-extension";
-import { getRandomInt } from "@/lib/utils/random";
 import { unstable_noStore } from "next/cache";
 import prisma from "@/lib/prisma";
 import sharp from "sharp";
 import { File as TFile } from "@prisma/client";
 import { saveFile } from "@/lib/helpers/save-file";
+import { getFileExtension, getRandomInt } from "@repo/hooks-and-utils";
 
 const uploadFolder = "/uploads";
 

@@ -1,0 +1,9 @@
+{
+  "extends": "@repo/config-typescript/react-library.json",
+  "baseUrl": ".",
+  "paths": {
+    "@/*": [
+      "./src/*"
+    ]
+  }
+}
