@@ -1,9 +1,8 @@
 "use client";
 
 import "@/app/[locale]/app.css";
-import { Button } from "@/components/button";
 import { RefreshCwIcon, TriangleAlertIcon } from "lucide-react";
-import { Text } from "@/components/text";
+import { Button } from "@repo/ui";
 
 export default function Error({
   error,
@@ -19,10 +18,10 @@ export default function Error({
         <div className="bg-error-100 absolute top-0 left-0 z-0 size-14 rounded-full" />
       </div>
       <h2 className="mt-6 text-center text-xl font-bold">مشکلی پیش آمد!</h2>
-      <Text className="mt-2 text-center text-neutral-500">
+      <p className="mt-2 text-center text-neutral-500">
         متاسفانه در حال حاضر یک مشکل فنی رخ داده است. لطفاً بعداً تلاش کنید یا
         با پشتیبانی تماس بگیرید.
-      </Text>
+      </p>
       <Button
         className="mt-6 self-center"
         onClick={() => reset()}

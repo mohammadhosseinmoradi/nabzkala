@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@repo/config-typescript/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {
@@ -12,7 +12,10 @@
         "./src/*"
       ]
     },
-    "noEmit": true
+    "noEmit": true,
+    "types": [
+      "@serwist/next/typings"
+    ]
   },
   "include": [
     "next-env.d.ts",

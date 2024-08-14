@@ -1,10 +1,9 @@
 "use client";
 
 import { HomeIcon, SearchXIcon } from "lucide-react";
-import { Button } from "@/components/button";
-import { Text } from "@/components/text";
 import Link from "next/link";
 import { routes } from "@/constants/routes";
+import { Button } from "@repo/ui";
 
 export default function NotFound() {
   return (
@@ -16,10 +15,10 @@ export default function NotFound() {
       <h2 className="mt-6 text-center text-xl font-bold">
         صفحه‌ای که به دنبال آن بودید یافت نشد!
       </h2>
-      <Text className="mt-2 text-center text-neutral-500">
+      <p className="mt-2 text-center text-neutral-500">
         متاسفانه صفحه‌ای که به دنبال آن بودید یافت نشد. ممکن است این صفحه حذف
         شده باشد یا آدرس آن تغییر کرده باشد.
-      </Text>
+      </p>
       <Button
         as={Link}
         href={routes.home.getPath()}

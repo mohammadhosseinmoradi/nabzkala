@@ -1,5 +1,4 @@
 import { WifiOffIcon } from "lucide-react";
-import { Text } from "@/components/text";
 
 export default function Page() {
   return (
@@ -11,10 +10,10 @@ export default function Page() {
       <h2 className="mt-6 text-center text-xl font-bold">
         اتصال به اینترنت برقرار نیست!
       </h2>
-      <Text className="mt-2 text-center text-neutral-500">
+      <p className="mt-2 text-center text-neutral-500">
         متاسفانه اتصال شما به اینترنت قطع شده است. لطفاً اتصال خود را چک کرده و
         دوباره تلاش کنید.
-      </Text>
+      </p>
     </div>
   );
 }
